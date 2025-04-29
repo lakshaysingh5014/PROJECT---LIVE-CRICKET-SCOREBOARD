@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Live Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .match-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: linear-gradient(to bottom, #1a1e2c, #1f2937);
+            border: 1px solid #374151;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .match-header {
+            background: #111827;
+            border-bottom: 1px solid #374151;
+            color: #e5e7eb;
+        }
+
+        .match-series {
+            color: #9ca3af;
+        }
+
+        .team-1-name, .team-2-name {
+            color: #e5e7eb;
+        }
+
+        .team-1-score, .team-2-score {
+            color: #60a5fa;
+        }
+
+        .match-info {
+            color: #9ca3af;
+        }
+
+        .match-result {
+            color: #34d399;
+        }
+    
+
+        select {
+            background-color: #1f2937;
+            color: #e2e8f0;
+            border: 1px solid #4b5563;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            width: 10%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        select:hover {
+            border-color: #60a5fa;
+            background-color: #2d3748;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+        }
+
+        select option {
+            background-color: #1f2937;
+            color: #e2e8f0;
+            padding: 0.5rem;
+        }
+    
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23e2e8f0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen text-white">
+    <script>
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        if (!isLoggedIn) {
+            window.location.href = 'login.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-blue-700 to-blue-900 shadow-xl">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="index.html" class="text-2xl md:text-3xl font-bold hover:text-blue-200 transition flex items-center">
+                    <i class="fas fa-trophy text-yellow-400 mr-2"></i>
+                    Realtime Sports Scoreboard
+                </a>
+                <div class="flex items-center">
+                    <nav class="hidden md:flex space-x-6 mr-4">
+                        <a href="./new.html" class="hover:text-blue-200 transition">NEWS</a>
+                        <a href="#features" class="hover:text-blue-200 transition">Features</a>
+                        <a href="#about" class="hover:text-blue-200 transition">About</a>
+                        <a href="#live-scores" class="hover:text-blue-200 transition font-semibold text-yellow-400">Live Scores</a>
+                        <button id="logout-btn" class="hover:text-blue-200 transition" onclick="logout()">Logout</button>
+                        <a href="contact.html" class="hover:text-blue-200 transition">Contact</a>
+                    </nav>
+                    <div class="flex items-center space-x-2">
+                        <span id="last-updated" class="text-sm">Last updated: Never</span>
+                        <button id="refresh-btn" class="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 transition">
+                            <i class="fas fa-sync-alt mr-1"></i> Refresh
+                        </button>
+                    </div>
+                    <button id="mobile-menu-button" class="md:hidden ml-2 text-white focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden mt-2 pb-2 fade-in">
+                <a href="index.html" class="block py-2 font-semibold">Home</a>
+                <button class="block py-2 hover:text-blue-200 transition w-full text-left" onclick="logout()">Logout</button>
+                <a href="contact.html" class="block py-2 hover:text-blue-200 transition">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6">
+        
+        <section class="text-center py-16 mb-12 bg-gradient-to-r from-blue-900 to-blue-800 rounded-2xl shadow-2xl slide-in">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-blue-400">
+                Live Sports Scores & Updates
+            </h1>
+            <p class="text-xl text-blue-200 mb-8">Experience the thrill of live cricket matches with our comprehensive coverage. Get ball-by-ball updates, detailed statistics, and expert analysis for all major cricket tournaments worldwide. Never miss a moment of the action with our real-time score updates and match alerts.</p>
+            <a href="#live-scores" class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full hover:from-yellow-500 hover:to-yellow-700 transition transform hover:scale-105 inline-flex items-center">
+                <i class="fas fa-bolt mr-2"></i>
+                View Live Scores
+            </a>
+        </section>
+
+        
+        <section id="features" class="mb-16 slide-in">
+            <h2 class="text-3xl font-bold text-center mb-10 bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-blue-400">Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gradient-to-br from-gray-800 to-gray-700 p-6 rounded-xl shadow-lg hover:transform hover:scale-105 transition">
+                    <i class="fas fa-clock text-4xl text-blue-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-3">Real-time Updates</h3>
+                    <p class="text-gray-300">Experience cricket like never before with our lightning-fast score updates. Get instant notifications for every boundary, wicket, and milestone. Our advanced system ensures you stay connected with every moment of the game, delivering accurate and timely updates for all ongoing matches.</p>
+                </div>
+                <div class="bg-gradient-to-br from-gray-800 to-gray-700 p-6 rounded-xl shadow-lg hover:transform hover:scale-105 transition">
+                    <i class="fas fa-chart-line text-4xl text-blue-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-3">Detailed Statistics</h3>
+                    <p class="text-gray-300">Dive deep into the game with our comprehensive statistical analysis. Track player performances, team rankings, and historical data. From batting averages to bowling economies, our platform provides in-depth insights that help you understand the game better and make informed predictions.</p>
+                </div>
+                <div class="bg-gradient-to-br from-gray-800 to-gray-700 p-6 rounded-xl shadow-lg hover:transform hover:scale-105 transition">
+                    <i class="fas fa-bell text-4xl text-blue-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-3">Match Alerts</h3>
+                    <p class="text-gray-300">Stay ahead of the game with our personalized alert system. Set up notifications for your favorite teams and matches. Receive instant updates for match starts, key moments, and final results. Our smart alerts ensure you never miss an important cricket moment, even when you're busy.</p>
+                </div>
+            </div>
+        </section>
+
+        
+     <section id="about" class="mb-16 bg-gradient-to-r from-blue-900 to-blue-800 rounded-2xl p-8 shadow-2xl slide-in">
+            <h2 class="text-3xl font-bold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-blue-400">About Us</h2>
+            <div class="max-w-3xl mx-auto text-center">
+                <p class="text-lg text-blue-200 mb-6">Welcome to Realtime Sports Scoreboard, your premier destination for live cricket coverage. We are passionate about bringing the excitement of cricket right to your screen. Our platform combines cutting-edge technology with comprehensive cricket knowledge to deliver an unmatched live scoring experience. From international test matches to domestic T20 leagues, we cover all formats of the game with precision and dedication. Our team of cricket enthusiasts works tirelessly to ensure you get accurate, real-time updates and insightful statistics for every match.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="pulse">
+                        <div class="text-3xl font-bold text-yellow-400 mb-2">1M+</div>
+                        <div class="text-blue-200">Active Users</div>
+                    </div>
+                    <div class="pulse">
+                        <div class="text-3xl font-bold text-yellow-400 mb-2">50+</div>
+                        <div class="text-blue-200">Sports Covered</div>
+                    </div>
+                    <div class="pulse">
+                        <div class="text-3xl font-bold text-yellow-400 mb-2">24/7</div>
+                        <div class="text-blue-200">Live Updates</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+    
+
+        
+        <section id="live-scores" class="mb-6">
+            <div class="container mx-auto px-4 py-8">
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <select id="series-filter" class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">All Series</option>
+                    </select>
+                    <select id="status-filter" class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">All Statuses</option>
+                        <option value="live">Live</option>
+                        <option value="completed">Completed</option>
+                        <option value="upcoming">Upcoming</option>
+                    </select>
+                </div>
+                <div id="matches-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="text-center py-4 text-gray-500">Loading matches...</div>
+                </div>
+            </div>
+        </section>
+
+        
+        <div id="match-details" class="hidden bg-white rounded-lg shadow-md p-6 mb-6">
+            <button id="back-btn" class="mb-4 text-blue-600 hover:text-blue-800 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Back to matches
+            </button>
+            <div id="match-details-content"></div>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-b from-gray-900 to-black text-white py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-trophy text-yellow-400 mr-2"></i>
+                        Realtime Sports Scoreboard
+                    </h2>
+                    <p class="text-blue-200 mt-2">Your ultimate destination for live sports coverage</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="index.html" class="hover:text-blue-300 transition">Home</a>
+                    <button class="hover:text-blue-300 transition" onclick="logout()">Logout</button>
+                    <a href="contact.html" class="hover:text-blue-300 transition">Contact</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 Cricket Live Dashboard. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    
+    <template id="match-card-template">
+        <div class="match-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer">
+            <div class="match-header p-3 bg-gray-50 border-b flex justify-between items-center">
+                <div class="match-series text-sm font-medium text-gray-600 truncate"></div>
+                <div class="match-status text-xs px-2 py-1 rounded-full"></div>
+            </div>
+            <div class="p-4">
+                <div class="teams space-y-3">
+                    <div class="team-1 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <span class="team-1-name font-medium"></span>
+                        </div>
+                        <span class="team-1-score font-semibold"></span>
+                    </div>
+                    <div class="team-2 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <span class="team-2-name font-medium"></span>
+                        </div>
+                        <span class="team-2-score font-semibold"></span>
+                    </div>
+                </div>
+                <div class="match-info mt-4 text-sm text-gray-600">
+                    <div class="flex items-center mb-1">
+                        <i class="far fa-calendar-alt mr-2"></i>
+                        <span class="match-date"></span>
+                    </div>
+                    <div class="flex items-center mb-1">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span class="match-venue"></span>
+                    </div>
+                    <div class="match-result mt-2 text-sm font-medium"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    </template>
+
+    <script>
+        const API_KEY = "9fe82ba1-83c9-4c2c-9d46-44dc547bc217";
+
+        async function loadIPLMatches() {
+            const container = document.getElementById("matches-container");
+            const template = document.getElementById("match-card-template");
+            const seriesFilter = document.getElementById("series-filter");
+            const statusFilter = document.getElementById("status-filter");
+            
+            container.innerHTML = "<div class='text-center py-4'><div class='loading'></div> Loading matches...</div>";
+
+            try {
+                
+                if (!navigator.onLine) {
+                    throw new Error('No internet connection');
+                }
+                const res = await fetch(`https://api.cricapi.com/v1/matches?apikey=${API_KEY}&offset=0&per_page=100`);
+                const data = await res.json();
+                
+                
+                document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+
+                if (!res.ok || data.status !== 'success') {
+                    console.error('API Error:', data);
+                    container.innerHTML = "<div class='text-center py-4 text-gray-500'>Error loading matches. Please check your API key or try again later.</div>";
+                    return;
+                }
+                
+                if (!data.data || !Array.isArray(data.data)) {
+                    console.error('Invalid API response format:', data);
+                    container.innerHTML = "<div class='text-center py-4 text-gray-500'>Invalid data received from server. Please try again.</div>";
+                    return;
+                }
+                
+                if (data.data.length === 0) {
+                    container.innerHTML = "<div class='text-center py-4 text-gray-500'>No matches available at the moment. Please check back later.</div>";
+                    return;
+                }
+
+                
+                const series = [...new Set(data.data.map(match => match.series_id))];
+                if (seriesFilter.children.length <= 1) {
+                    series.forEach(series => {
+                        const option = document.createElement('option');
+                        option.value = series;
+                        option.textContent = series;
+                        seriesFilter.appendChild(option);
+                    });
+                }
+
+                
+                let filteredMatches = data.data;
+                const selectedSeries = seriesFilter.value;
+                const selectedStatus = statusFilter.value;
+
+                if (selectedSeries !== 'all') {
+                    filteredMatches = filteredMatches.filter(match => match.series_id === selectedSeries);
+                }
+
+                if (selectedStatus !== 'all') {
+                    filteredMatches = filteredMatches.filter(match => {
+                        const status = match.status?.toLowerCase() || '';
+                        switch(selectedStatus) {
+                            case 'live': return status.includes('live');
+                            case 'completed': return status.includes('won') || status.includes('drawn');
+                            case 'upcoming': return status.includes('upcoming') || status.includes('scheduled');
+                            default: return true;
+                        }
+                    });
+                }
+
+                container.innerHTML = "";
+                
+                
+                filteredMatches.sort((a, b) => {
+                    const aIsLive = a.status?.toLowerCase().includes('live') || false;
+                    const bIsLive = b.status?.toLowerCase().includes('live') || false;
+                    return bIsLive - aIsLive;
+                });
+
+                filteredMatches.forEach(match => {
+                    const clone = template.content.cloneNode(true);
+                    
+                    
+                    clone.querySelector('.match-series').textContent = match.series_id || match.name || "Cricket Match";
+                    
+                    
+                    const statusElement = clone.querySelector('.match-status');
+                    const status = match.status?.toLowerCase() || '';
+                    statusElement.textContent = match.status || "Status Unknown";
+                    
+                    if (status.includes('live')) {
+                        statusElement.classList.add('bg-green-100', 'text-green-800', 'animate-pulse');
+                    } else if (status.includes('won') || status.includes('complete')) {
+                        statusElement.classList.add('bg-blue-100', 'text-blue-800');
+                    } else if (status.includes('upcoming') || status.includes('scheduled')) {
+                        statusElement.classList.add('bg-yellow-100', 'text-yellow-800');
+                    } else {
+                        statusElement.classList.add('bg-gray-100', 'text-gray-800');
+                    }
+
+                    
+                    const team1Name = clone.querySelector('.team-1-name');
+                    const team1Score = clone.querySelector('.team-1-score');
+                    const team2Name = clone.querySelector('.team-2-name');
+                    const team2Score = clone.querySelector('.team-2-score');
+
+                    team1Name.textContent = match.teams?.[0] || "Team 1";
+                    team2Name.textContent = match.teams?.[1] || "Team 2";
+
+                    if (match.score && Array.isArray(match.score)) {
+                        const team1ScoreObj = match.score.find(s => s.inning?.includes(match.teams[0]));
+                        const team2ScoreObj = match.score.find(s => s.inning?.includes(match.teams[1]));
+                        
+                        team1Score.textContent = team1ScoreObj ? `${team1ScoreObj.r}/${team1ScoreObj.w} (${team1ScoreObj.o})` : "Yet to bat";
+                        team2Score.textContent = team2ScoreObj ? `${team2ScoreObj.r}/${team2ScoreObj.w} (${team2ScoreObj.o})` : "Yet to bat";
+                    } else {
+                        team1Score.textContent = "Yet to bat";
+                        team2Score.textContent = "Yet to bat";
+                    }
+
+                
+                    clone.querySelector('.match-date').textContent = new Date(match.dateTimeGMT).toLocaleDateString();
+                    clone.querySelector('.match-venue').textContent = match.venue || "Venue TBD";
+                    clone.querySelector('.match-result').textContent = match.status || "";
+
+                    container.appendChild(clone);
+                });
+
+            
+                document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+
+            } catch (err) {
+                console.error('API Error:', err);
+                container.innerHTML = "<div class='text-center py-4 text-red-500'>Failed to load matches. Please try again later.</div>";
+            }
+        }
+
+        
+        document.getElementById('series-filter').addEventListener('change', loadIPLMatches);
+        document.getElementById('status-filter').addEventListener('change', loadIPLMatches);
+
+    
+        loadIPLMatches();
+        setInterval(loadIPLMatches, 60000); 
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Realtime Sports Scoreboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen text-white">
+    <header class="bg-gradient-to-r from-blue-700 to-blue-900 shadow-xl">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="index.html"
+                    class="text-2xl md:text-3xl font-bold hover:text-blue-200 transition flex items-center">
+                    <i class="fas fa-trophy text-yellow-400 mr-2"></i>
+                    Realtime Sports Scoreboard
+                </a>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="index.html#features" class="hover:text-blue-200 transition">Features</a>
+                    <a href="index.html#about" class="hover:text-blue-200 transition">About</a>
+                    <a href="index.html#live-scores" class="hover:text-blue-200 transition">Live Scores</a>
+                    <a href="login.html" class="hover:text-blue-200 transition">Login</a>
+                    <a href="signup.html" class="font-semibold text-yellow-400">Sign Up</a>
+                    <a href="contact.html" class="hover:text-blue-200 transition">Contact</a>
+                </nav>
+                <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden mt-2 pb-2 fade-in">
+                <a href="index.html#features" class="block py-2 hover:text-blue-200 transition">Features</a>
+                <a href="index.html#about" class="block py-2 hover:text-blue-200 transition">About</a>
+                <a href="index.html#live-scores" class="block py-2 hover:text-blue-200 transition">Live Scores</a>
+                <a href="login.html" class="block py-2 hover:text-blue-200 transition">Login</a>
+                <a href="signup.html" class="block py-2 text-yellow-400 font-semibold">Sign Up</a>
+                <a href="contact.html" class="block py-2 hover:text-blue-200 transition">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-10">
+        <div
+            class="max-w-md mx-auto bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl shadow-xl overflow-hidden slide-in hover-scale">
+            <div class="bg-gradient-to-r from-blue-700 to-blue-900 text-white py-6 px-6">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-user-plus text-yellow-400 mr-3"></i>
+                    Create Your Account
+                </h2>
+                <p class="text-blue-200 mt-2">Join the sports community today</p>
+            </div>
+
+            <div class="p-8">
+                <div id="signup-error"
+                    class="hidden bg-red-900/50 border border-red-400 text-red-200 px-4 py-3 rounded-lg relative mb-4">
+                    <span id="signup-error-text">Error message here</span>
+                </div>
+
+                <form id="signup-form" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="first-name" class="block text-blue-200 font-medium mb-2">First Name</label>
+                            <input type="text" id="first-name" name="first_name"
+                                class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                                required>
+                        </div>
+                        <div>
+                            <label for="last-name" class="block text-blue-200 font-medium mb-2">Last Name</label>
+                            <input type="text" id="last-name" name="last_name"
+                                class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                                required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-blue-200 font-medium mb-2">Email Address</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-3 top-3 text-gray-400"></i>
+                            <input type="email" id="email" name="email"
+                                class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                                required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-blue-200 font-medium mb-2">Password</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                            <input type="password" id="password" name="password"
+                                class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                                required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="confirm-password" class="block text-blue-200 font-medium mb-2">Confirm
+                            Password</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                            <input type="password" id="confirm-password" name="confirm_password"
+                                class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <input type="checkbox" id="terms" name="terms"
+                            class="h-4 w-4 mt-1 bg-gray-700 border-gray-600 rounded text-blue-600 focus:ring-blue-500"
+                            required>
+                        <label for="terms" class="ml-2 block text-sm text-blue-200">
+                            I agree to the <a href="#" class="text-yellow-400 hover:text-yellow-300 transition">Terms of
+                                Service</a> and <a href="#"
+                                class="text-yellow-400 hover:text-yellow-300 transition">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <div>
+                        <button type="submit"
+                            class="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-lg hover:from-yellow-500 hover:to-yellow-700 transition transform hover:scale-105">
+                            <span id="submit-text" class="flex items-center justify-center">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Create Account
+                            </span>
+                            <span id="submit-loading" class="hidden flex items-center justify-center">
+                                <span class="loading mr-2" style="width: 16px; height: 16px;"></span>
+                                Creating account...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 text-center">
+                    <p class="text-blue-200">Already have an account?
+                        <a href="login.html" class="text-yellow-400 hover:text-yellow-300 transition font-semibold">Log
+                            in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-b from-gray-900 to-black text-white py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-blue-200">About Us</h3>
+                    <p class="text-gray-400">Realtime Sports Scoreboard provides comprehensive live sports coverage,
+                        real-time updates, and detailed statistics for sports enthusiasts worldwide.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-blue-200">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html#features"
+                                class="text-gray-400 hover:text-blue-300 transition">Features</a></li>
+                        <li><a href="index.html#about" class="text-gray-400 hover:text-blue-300 transition">About</a>
+                        </li>
+                        <li><a href="index.html#live-scores" class="text-gray-400 hover:text-blue-300 transition">Live
+                                Scores</a></li>
+                        <li><a href="login.html" class="text-gray-400 hover:text-blue-300 transition">Login</a></li>
+                        <li><a href="signup.html" class="text-gray-400 hover:text-blue-300 transition">Sign Up</a></li>
+                        <li><a href="contact.html" class="text-gray-400 hover:text-blue-300 transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-blue-200">Follow Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-yellow-400 transition transform hover:scale-110">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-yellow-400 transition transform hover:scale-110">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-yellow-400 transition transform hover:scale-110">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-yellow-400 transition transform hover:scale-110">
+                            <i class="fab fa-linkedin-in text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2023 Realtime Sports Scoreboard. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+    
+        const signupForm = document.getElementById('signup-form');
+        const submitText = document.getElementById('submit-text');
+        const submitLoading = document.getElementById('submit-loading');
+        const errorElement = document.getElementById('signup-error');
+        const errorTextElement = document.getElementById('signup-error-text');
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            
+            errorElement.classList.add('hidden');
+
+            
+            const firstName = document.getElementById('first-name').value.trim();
+            const lastName = document.getElementById('last-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const terms = document.getElementById('terms').checked;
+
+        
+            if (!firstName || !lastName || !email || !password || !confirmPassword || !terms) {
+                errorTextElement.textContent = 'All fields are required';
+                errorElement.classList.remove('hidden');
+                return;
+            }
+
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorTextElement.textContent = 'Please enter a valid email address';
+                errorElement.classList.remove('hidden');
+                return;
+            }
+
+
+            if (password !== confirmPassword) {
+                errorTextElement.textContent = 'Passwords do not match';
+                errorElement.classList.remove('hidden');
+                return;
+            }
+
+    
+            if (password.length < 8) {
+                errorTextElement.textContent = 'Password must be at least 8 characters long';
+                errorElement.classList.remove('hidden');
+                return;
+            }
+
+    
+            submitText.classList.add('hidden');
+            submitLoading.classList.remove('hidden');
+
+            
+            const formData = new FormData();
+            formData.append('action', 'signup');
+            formData.append('name', `${firstName} ${lastName}`);
+            formData.append('email', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch('backend/auth.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+            
+                    window.location.href = 'login.html';
+                } else {
+                    
+                    errorTextElement.textContent = data.message;
+                    errorElement.classList.remove('hidden');
+                }
+            } catch (error) {
+                
+                errorTextElement.textContent = 'An error occurred. Please try again later.';
+                errorElement.classList.remove('hidden');
+            } finally {
+                
+                submitText.classList.remove('hidden');
+                submitLoading.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>
